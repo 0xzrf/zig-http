@@ -50,9 +50,6 @@ pub const Parser = struct {
     }
 
     fn extractRoute(line: []const u8, req: *ParsedRequest) void {
-        if (contains(u8, line, "/") != null) {
-            req.setRoute(Routes.ROOT);
-        }
         if (contains(u8, line, "/get-contact") != null) {
             req.setRoute(Routes.GET_CONTACT);
         }
@@ -64,6 +61,9 @@ pub const Parser = struct {
         }
         if (contains(u8, line, "/delete-contact") != null) {
             req.setRoute(Routes.DELETE_CONTACT);
+        }
+        if (contains(u8, line, "/") != null) {
+            req.setRoute(Routes.ROOT);
         }
     }
 };
@@ -85,4 +85,19 @@ test "GET / parses correctly" {
     assert(requestParser.route != Routes.DELETE_CONTACT);
 }
 
-test "GET /get-contact parses correctly" {}
+test "GET /get-contact parses correctly" {
+    const assert = std.debug.assert;
+
+    var requestParser = ParsedRequest{ .method = null, .route = null, .user_data = null };
+    const request = "GET /get-contact HTTP/1.1\r\n";
+
+    Parser.extractField(request, &requestParser);
+
+    assert(requestParser.method != null);
+    assert(requestParser.method == Methods.GET);
+    assert(requestParser.method != Methods.POST);
+
+    assert(requestParser.route != null);
+    assert(requestParser.route == Routes.GET_CONTACT);
+    assert(requestParser.route != Routes.DELETE_CONTACT);
+}
