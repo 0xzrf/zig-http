@@ -104,3 +104,27 @@ test "POST /upload-contact parses correctly" {
 
     try expectEqual(requestParser.route, Routes.UPLOAD_CONTACT);
 }
+
+test "PUT /update-contact parses correctly" {
+    const expectEqual = std.testing.expectEqual;
+
+    var requestParser = ParsedRequest{ .method = null, .route = null, .user_data = null };
+    const request = "PUT /update-contact HTTP/1.1\r\n";
+
+    Parser.extractField(request, &requestParser);
+    try expectEqual(requestParser.method, Methods.PUT);
+
+    try expectEqual(requestParser.route, Routes.UPDATE_CONTACT);
+}
+
+test "DELETE /delete-contact parses correctly" {
+    const expectEqual = std.testing.expectEqual;
+
+    var requestParser = ParsedRequest{ .method = null, .route = null, .user_data = null };
+    const request = "DELETE /delete-contact HTTP/1.1\r\n";
+
+    Parser.extractField(request, &requestParser);
+    try expectEqual(requestParser.method, Methods.DELETE);
+
+    try expectEqual(requestParser.route, Routes.DELETE_CONTACT);
+}
