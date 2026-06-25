@@ -18,4 +18,5 @@ test "startsWith tests" {
     assert(startsWith("World Hello", "Hello") == false);
 
     assert(startsWith("hadoken", "had"));
+    assert(startsWith("hello world", "H") == false);
 }
