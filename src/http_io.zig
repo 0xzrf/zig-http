@@ -54,6 +54,12 @@ pub fn httpListener(io: *const std.Io) void {
             else => continue,
         };
 
-        print("{}", .{response});
+        var response_buf: [READ_BUF_LIMIT]u8 = undefined;
+        const wireResponse = response.createResponseWire(&response_buf) catch |err| {
+            print("Failed to build response: {}\n", .{err});
+            continue;
+        };
+
+        client_writer.interface.writeAll(wireResponse) catch |err| print("Error occured while writing to the write: {}", .{err});
     }
 }

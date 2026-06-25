@@ -1,4 +1,6 @@
 //! Defines different types used accross the project
+const std = @import("std");
+
 pub const Methods = enum { GET, PUT, POST, DELETE };
 pub const StatusCode = enum(u16) { OK = 200, CREATED = 201, BAD_REQUEST = 400, UNAUTHORIZED = 401, NOT_FOUND = 404, METHOD_NOT_ALLOWED = 405, INTERNAL_SERVER_ERROR = 500, NOT_IMPLEMENTED = 501 };
 
@@ -53,12 +55,16 @@ pub const ParsedResponse = struct {
     contentType: ContentType,
     returnData: []const u8,
 
-    pub fn createResponseWire(self: *ParsedResponse) []u8 {
-        const statusBytes = statusCodeBytes(self.*.status);
-        const typeBytes = contentTypeBytes(self.*.contentType);
-        const contentLength = self.returnData.len;
-        const EOL_DELIMINATOR = "\r\n";
-
-        return "HTTP/1.1 " + statusBytes + EOL_DELIMINATOR + "Content-Type: " + typeBytes + EOL_DELIMINATOR + "Content-Length: " + contentLength + EOL_DELIMINATOR * 2 + self.*.returnData;
+    pub fn createResponseWire(self: ParsedResponse, buf: []u8) ![]u8 {
+        return std.fmt.bufPrint(
+            buf,
+            "HTTP/1.1 {s}\r\nContent-Type: {s}\r\nContent-Length: {d}\r\n\r\n{s}",
+            .{
+                statusCodeBytes(self.status),
+                contentTypeBytes(self.contentType),
+                self.returnData.len,
+                self.returnData,
+            },
+        );
     }
 };
