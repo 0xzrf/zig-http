@@ -41,9 +41,9 @@ pub fn httpListener(io: *const std.Io) void {
         }
 
         var client_reader = client.reader(io.*, reader_buf[0..]);
-        var client_writer = client.writer(io, writer_buf[0..]);
+        var client_writer = client.writer(io.*, writer_buf[0..]);
 
-        var parser = Parser{ .reader = &client_reader, .writer = &client_writer };
+        var parser = Parser{ .reader = &client_reader.interface, .writer = &client_writer.interface };
         parser.parseRequest();
     }
 }
