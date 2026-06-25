@@ -3,6 +3,8 @@
 
 const std = @import("std");
 const types = @import("types.zig");
+const routes = @import("routes/mod.zig");
+
 const ParsedRequest = types.ParsedRequest;
 const Methods = types.Methods;
 const Routes = types.Routes;
