@@ -17,7 +17,7 @@ pub const Parser = struct {
 
     pub fn parseRequest(self: *Parser) void {
         var reader = self.*.reader;
-        var request = ParsedRequest{ .method = null, .route = null, .user_data = null };
+        var request = ParsedRequest.new();
 
         while (reader.takeDelimiter('\n') catch |err|
             {
@@ -71,7 +71,7 @@ pub const Parser = struct {
 test "GET / parses correctly" {
     const expectEqual = std.testing.expectEqual;
 
-    var requestParser = ParsedRequest{ .method = null, .route = null, .user_data = null };
+    var requestParser = ParsedRequest.new();
     const request = "GET / HTTP/1.1\r\n";
 
     Parser.extractField(request, &requestParser);
@@ -84,7 +84,7 @@ test "GET / parses correctly" {
 test "GET /get-contact parses correctly" {
     const expectEqual = std.testing.expectEqual;
 
-    var requestParser = ParsedRequest{ .method = null, .route = null, .user_data = null };
+    var requestParser = ParsedRequest.new();
     const request = "GET /get-contact HTTP/1.1\r\n";
 
     Parser.extractField(request, &requestParser);
@@ -96,7 +96,7 @@ test "GET /get-contact parses correctly" {
 test "POST /upload-contact parses correctly" {
     const expectEqual = std.testing.expectEqual;
 
-    var requestParser = ParsedRequest{ .method = null, .route = null, .user_data = null };
+    var requestParser = ParsedRequest.new();
     const request = "POST /upload-contact HTTP/1.1\r\n";
 
     Parser.extractField(request, &requestParser);
@@ -108,7 +108,7 @@ test "POST /upload-contact parses correctly" {
 test "PUT /update-contact parses correctly" {
     const expectEqual = std.testing.expectEqual;
 
-    var requestParser = ParsedRequest{ .method = null, .route = null, .user_data = null };
+    var requestParser = ParsedRequest.new();
     const request = "PUT /update-contact HTTP/1.1\r\n";
 
     Parser.extractField(request, &requestParser);
@@ -120,7 +120,7 @@ test "PUT /update-contact parses correctly" {
 test "DELETE /delete-contact parses correctly" {
     const expectEqual = std.testing.expectEqual;
 
-    var requestParser = ParsedRequest{ .method = null, .route = null, .user_data = null };
+    var requestParser = ParsedRequest.new();
     const request = "DELETE /delete-contact HTTP/1.1\r\n";
 
     Parser.extractField(request, &requestParser);

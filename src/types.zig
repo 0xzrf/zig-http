@@ -10,6 +10,10 @@ pub const ParsedRequest = struct {
     method: ?Methods,
     user_data: ?[]u8,
 
+    pub fn new() ParsedRequest {
+        return ParsedRequest{ .route = null, .method = null, .user_data = null };
+    }
+
     pub fn setRoute(self: *ParsedRequest, route: Routes) void {
         self.*.route = route;
     }
