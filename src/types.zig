@@ -1,6 +1,6 @@
 //! Defines different types used accross the project
 pub const Methods = enum { GET, PUT, POST, DELETE };
-pub const StatusCode = enum(u16) { OK = 200, CREATED, BAD_REQUEST = 400, UNAUTHORIZED, NOT_FOUND, METHOD_NOT_ALLOWED, INTERNAL_SERVER_ERROR = 500, NOT_IMPLEMENTED };
+pub const StatusCode = enum(u16) { OK = 200, CREATED = 201, BAD_REQUEST = 400, UNAUTHORIZED = 401, NOT_FOUND = 404, METHOD_NOT_ALLOWED = 405, INTERNAL_SERVER_ERROR = 500, NOT_IMPLEMENTED = 501 };
 
 pub const Routes = enum { GET_CONTACT, UPDATE_CONTACT, UPLOAD_CONTACT, DELETE_CONTACT, ROOT };
 pub const ContentType = enum { HTML, JSON };
@@ -28,8 +28,37 @@ pub const ParsedRequest = struct {
     }
 };
 
+pub fn contentTypeBytes(contentType: ContentType) []const u8 {
+    return switch (contentType) {
+        ContentType.HTML => "text/html",
+        ContentType.JSON => "application/json",
+    };
+}
+
+pub fn statusCodeBytes(status: StatusCode) []const u8 {
+    return switch (status) {
+        StatusCode.OK => "200 OK",
+        StatusCode.CREATED => "201 Created",
+        StatusCode.BAD_REQUEST => "400 Bad Request",
+        StatusCode.UNAUTHORIZED => "401 Unauthorized",
+        StatusCode.NOT_FOUND => "404 Not Found",
+        StatusCode.METHOD_NOT_ALLOWED => "405 Method Not Allowed",
+        StatusCode.INTERNAL_SERVER_ERROR => "500 Internal Server Error",
+        StatusCode.NOT_IMPLEMENTED => "501 Not Implemented",
+    };
+}
+
 pub const ParsedResponse = struct {
     status: StatusCode,
     contentType: ContentType,
     returnData: []const u8,
+
+    pub fn createResponseWire(self: *ParsedResponse) []u8 {
+        const statusBytes = statusCodeBytes(self.*.status);
+        const typeBytes = contentTypeBytes(self.*.contentType);
+        const contentLength = self.returnData.len;
+        const EOL_DELIMINATOR = "\r\n";
+
+        return "HTTP/1.1 " + statusBytes + EOL_DELIMINATOR + "Content-Type: " + typeBytes + EOL_DELIMINATOR + "Content-Length: " + contentLength + EOL_DELIMINATOR * 2 + self.*.returnData;
+    }
 };
