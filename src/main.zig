@@ -4,10 +4,8 @@
 //! build a response for the request, and finally send back the appropriate respone
 
 const std = @import("std");
-
-extern fn http_listener(init: *const std.Io) void;
+const http_io = @import("http_io.zig");
 
 pub fn main(init: std.process.Init) void {
-    // Listen to the tcp server
-    http_listener(&init.io);
+    http_io.http_listener(&init.io);
 }
