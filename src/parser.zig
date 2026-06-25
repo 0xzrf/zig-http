@@ -69,35 +69,27 @@ pub const Parser = struct {
 };
 
 test "GET / parses correctly" {
-    const assert = std.debug.assert;
+    const expectEqual = std.testing.expectEqual;
 
     var requestParser = ParsedRequest{ .method = null, .route = null, .user_data = null };
     const request = "GET / HTTP/1.1\r\n";
 
     Parser.extractField(request, &requestParser);
 
-    assert(requestParser.method != null);
-    assert(requestParser.method == Methods.GET);
-    assert(requestParser.method != Methods.POST);
+    try expectEqual(requestParser.method, Methods.GET);
 
-    assert(requestParser.route != null);
-    assert(requestParser.route == Routes.ROOT);
-    assert(requestParser.route != Routes.DELETE_CONTACT);
+    try expectEqual(requestParser.route, Routes.ROOT);
 }
 
 test "GET /get-contact parses correctly" {
-    const assert = std.debug.assert;
+    const expectEqual = std.testing.expectEqual;
 
     var requestParser = ParsedRequest{ .method = null, .route = null, .user_data = null };
     const request = "GET /get-contact HTTP/1.1\r\n";
 
     Parser.extractField(request, &requestParser);
+    std.debug.print("route expected: {}\nactual {?}\n", .{ Routes.GET_CONTACT, requestParser.route });
+    try expectEqual(requestParser.method, Methods.GET);
 
-    assert(requestParser.method != null);
-    assert(requestParser.method == Methods.GET);
-    assert(requestParser.method != Methods.POST);
-
-    assert(requestParser.route != null);
-    assert(requestParser.route == Routes.GET_CONTACT);
-    assert(requestParser.route != Routes.DELETE_CONTACT);
+    try expectEqual(requestParser.route, Routes.GET_CONTACT);
 }
