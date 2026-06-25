@@ -4,8 +4,7 @@ const print = std.debug.print;
 export fn http_listener(io: *const std.Io) void {
     // const gpa = init.gpa;
 
-    const ip_addr = [4]u8{ 0, 0, 0, 0 };
-    const addr = std.Io.net.IpAddress.parse(&ip_addr, 3636) catch |err| {
+    const addr = std.Io.net.IpAddress.parse("0.0.0.0", 3636) catch |err| {
         print("Failed to parse IP Address: {}\n", .{err});
         return;
     };

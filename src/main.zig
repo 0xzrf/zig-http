@@ -8,7 +8,6 @@ const std = @import("std");
 extern fn http_listener(init: *const std.Io) void;
 
 pub fn main(init: std.process.Init) void {
-    std.debug.print("Hello World!\nI'm {s}, and I'm {} y/o\n", .{ "Zeref", 20 });
-
+    // Listen to the tcp server
     http_listener(&init.io);
 }
