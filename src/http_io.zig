@@ -5,6 +5,9 @@
 
 const std = @import("std");
 const constants = @import("constants.zig");
+const routes = @import("routes/mod.zig");
+const types = @import("types.zig");
+const Routes = types.Routes;
 const Parser = @import("parser.zig").Parser;
 
 const print = std.debug.print;
@@ -44,6 +47,13 @@ pub fn httpListener(io: *const std.Io) void {
         var client_writer = client.writer(io.*, writer_buf[0..]);
 
         var parser = Parser{ .reader = &client_reader.interface, .writer = &client_writer.interface };
-        parser.parseRequest();
+        const parsed_request = parser.parseRequest();
+
+        const response = switch (parsed_request.route.?) {
+            Routes.ROOT => routes.root.handleRootCall(),
+            else => continue,
+        };
+
+        print("{}", .{response});
     }
 }

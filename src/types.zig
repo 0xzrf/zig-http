@@ -31,5 +31,5 @@ pub const ParsedRequest = struct {
 pub const ParsedResponse = struct {
     status: StatusCode,
     contentType: ContentType,
-    returnData: []u8,
+    returnData: []const u8,
 };

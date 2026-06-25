@@ -3,7 +3,6 @@
 
 const std = @import("std");
 const types = @import("types.zig");
-const routes = @import("routes/mod.zig");
 
 const ParsedRequest = types.ParsedRequest;
 const Methods = types.Methods;
@@ -17,7 +16,7 @@ pub const Parser = struct {
     const contains = std.mem.indexOf;
     const print = std.debug.print;
 
-    pub fn parseRequest(self: *Parser) !ParsedRequest {
+    pub fn parseRequest(self: *Parser) ParsedRequest {
         var reader = self.*.reader;
         var request = ParsedRequest.new();
 
@@ -26,7 +25,7 @@ pub const Parser = struct {
         while (reader.takeDelimiter('\n') catch |err|
             {
                 print("Unable to take delimiter: {}\n", .{err});
-                return;
+                return request;
             }) |line| // this line should be each line, with ending \n excluded(every line in an http header ends with \r\n)
         {
             Parser.extractField(line, &request);
@@ -37,9 +36,8 @@ pub const Parser = struct {
             }
         }
 
-        if (request.allRequiredSet()) {
-            return request;
-        }
+        // TODO: figure out throwing error as it's causing issue an issue right now in macOs
+        return request;
     }
 
     fn extractField(line: []const u8, req: *ParsedRequest) void {

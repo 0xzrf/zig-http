@@ -1,22 +1,10 @@
 const types = @import("../types.zig");
 const ContentType = types.ContentType;
-const ParsedResponse = types.ContentType;
+const ParsedResponse = types.ParsedResponse;
 const StatusCode = types.StatusCode;
 
 pub fn handleRootCall() ParsedResponse {
-    const html =
-        \\<!DOCTYPE html>
-        \\<html lang="en">
-        \\<head>
-        \\    <meta charset="UTF-8">
-        \\    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        \\    <title>Hello World</title>
-        \\</head>
-        \\<body>
-        \\    <h1>Hello, World!</h1>
-        \\</body>
-        \\</html>
-    ;
+    const html = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Hello World</title></head><body><h1>Hello, World!</h1></body></html>";
 
     return ParsedResponse{ .status = StatusCode.OK, .contentType = ContentType.HTML, .returnData = html };
 }
