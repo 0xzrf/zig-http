@@ -92,3 +92,15 @@ test "GET /get-contact parses correctly" {
 
     try expectEqual(requestParser.route, Routes.GET_CONTACT);
 }
+
+test "POST /upload-contact parses correctly" {
+    const expectEqual = std.testing.expectEqual;
+
+    var requestParser = ParsedRequest{ .method = null, .route = null, .user_data = null };
+    const request = "POST /upload-contact HTTP/1.1\r\n";
+
+    Parser.extractField(request, &requestParser);
+    try expectEqual(requestParser.method, Methods.POST);
+
+    try expectEqual(requestParser.route, Routes.UPLOAD_CONTACT);
+}
