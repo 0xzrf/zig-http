@@ -5,8 +5,10 @@
 
 const std = @import("std");
 
-pub fn main() void {
+extern fn http_listener(init: *const std.Io) void;
+
+pub fn main(init: std.process.Init) void {
     std.debug.print("Hello World!\nI'm {s}, and I'm {} y/o\n", .{ "Zeref", 20 });
 
-    std.http.Client.connect(std.http.Client, host: HostName, port: u16, protocol: Protocol);
+    http_listener(&init.io);
 }

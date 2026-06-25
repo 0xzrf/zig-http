@@ -1,0 +1,4 @@
+BIN_OUT = ./zig-out/bin/zig-http
+
+run:
+    $(BIN_OUT)
