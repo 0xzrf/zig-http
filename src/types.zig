@@ -1,5 +1,5 @@
 //! Defines different types used accross the project
-pub const Methods = enum { GET, PUT, PUSH, DELETE };
+pub const Methods = enum { GET, PUT, POST, DELETE };
 pub const StatusCode = enum(u16) { OK = 200, CREATED, BAD_REQUEST = 400, UNAUTHORIZED, NOT_FOUND, METHOD_NOT_ALLOWED, INTERNAL_SERVER_ERROR = 500, NOT_IMPLEMENTED };
 
 pub const Routes = enum { GET_CONTACT, UPDATE_CONTACT, UPLOAD_CONTACT, DELETE_CONTACT, ROOT };
