@@ -3,4 +3,9 @@
 
 const std = @import("std");
 
-pub fn parseRequest(_: std.Io.Reader) void {}
+pub const Parser = struct {
+    reader: *std.Io.Reader,
+    writer: *std.Io.Writer,
+
+    pub fn parseRequest(self: Parser) void {}
+};

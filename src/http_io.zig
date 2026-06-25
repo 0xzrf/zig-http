@@ -5,6 +5,7 @@
 
 const std = @import("std");
 const constants = @import("constants.zig");
+const Parser = @import("parser.zig").Parser;
 
 const print = std.debug.print;
 const IP_ADDR = constants.IP_ADDR;
@@ -32,19 +33,17 @@ pub fn httpListener(io: *const std.Io) void {
         defer client.close(io.*); // closes the client once it has served the request(End of scope)
 
         var reader_buf: [READ_BUF_LIMIT]u8 = undefined;
+        var writer_buf: [READ_BUF_LIMIT]u8 = undefined;
 
-        for (&reader_buf) |*item| {
-            item.* = 0;
+        for (&reader_buf, &writer_buf) |*item1, *item2| {
+            item1.* = 0;
+            item2.* = 0;
         }
 
         var client_reader = client.reader(io.*, reader_buf[0..]);
-        const reader = &client_reader.interface;
+        var client_writer = client.writer(io, writer_buf[0..]);
 
-        while (reader.takeDelimiter('\n') catch |err| {
-            print("Unable to take delimitor: {}\n", .{err});
-            return;
-        }) |line| {
-            print("recv {d} bytes: {s}\n", .{ line.len, line });
-        }
+        var parser = Parser{ .reader = &client_reader, .writer = &client_writer };
+        parser.parseRequest();
     }
 }
