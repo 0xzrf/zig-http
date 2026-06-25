@@ -1,10 +1,18 @@
-const std = @import("std");
-const intCast = @import("builtin");
-const print = std.debug.print;
+//! This is the main orchestrator of the http server
+//! It'll start listening on port 3636, listen to the incoming packets on the server
+//! then send it to the parser to get the appropriate method + route for it,
+//! build a response for the request, and finally send back the appropriate respone
 
-pub fn http_listener(io: *const std.Io) void {
-    const ip_addr = "0.0.0.0";
-    const addr = std.Io.net.IpAddress.parse(ip_addr, 3636) catch |err| {
+const std = @import("std");
+const constants = @import("constants.zig");
+
+const print = std.debug.print;
+const IP_ADDR = constants.IP_ADDR;
+const PORT = constants.PORT;
+const READ_BUF_LIMIT = constants.READ_BUF_LIMIT;
+
+pub fn httpListener(io: *const std.Io) void {
+    const addr = std.Io.net.IpAddress.parse(IP_ADDR, PORT) catch |err| {
         print("Failed to parse IP Address: {}\n", .{err});
         return;
     };
@@ -14,7 +22,7 @@ pub fn http_listener(io: *const std.Io) void {
         return;
     };
 
-    std.debug.print("TCP listening on {s}:{}\n", .{ ip_addr, 3636 });
+    std.debug.print("TCP listening on http://{s}:{}\n", .{ IP_ADDR, PORT });
 
     while (true) {
         var client = server.accept(io.*) catch |err| {
@@ -23,7 +31,7 @@ pub fn http_listener(io: *const std.Io) void {
         };
         defer client.close(io.*); // closes the client once it has served the request(End of scope)
 
-        var reader_buf: [1024]u8 = undefined;
+        var reader_buf: [READ_BUF_LIMIT]u8 = undefined;
 
         for (&reader_buf) |*item| {
             item.* = 0;
@@ -33,7 +41,7 @@ pub fn http_listener(io: *const std.Io) void {
         const reader = &client_reader.interface;
 
         while (reader.takeDelimiter('\n') catch |err| {
-            print("Unable to take delimiter: {}\n", .{err});
+            print("Unable to take delimitor: {}\n", .{err});
             return;
         }) |line| {
             print("recv {d} bytes: {s}\n", .{ line.len, line });

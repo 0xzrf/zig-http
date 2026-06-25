@@ -34,8 +34,6 @@ This is just a learning project, so it'll only support a subset of features prov
 3. PUT
 
 ### Status Code
-1. **1xx — Informational**: `100 Continue`
 2. **2xx - Success**: `200 OK`, `201 Created`
 3. **4xx - Client error**: `400 Bad Request`, `401 Unauthorized`, `404 Not Found`, `405 Method Not Allowed`
 4. **5xx - Server Error**: `500 Internal Server Error`, `501 Not Implemented`
-
