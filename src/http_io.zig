@@ -47,19 +47,20 @@ pub fn httpListener(io: *const std.Io) void {
         var client_writer = client.writer(io.*, writer_buf[0..]);
 
         var parser = Parser{ .reader = &client_reader.interface, .writer = &client_writer.interface };
-        const parsed_request = parser.parseRequest();
+        const parsedRequest = parser.parseRequest();
 
-        const response = switch (parsed_request.route.?) {
+        const response = switch (parsedRequest.route.?) {
             Routes.ROOT => routes.root.handleRootCall(),
             else => continue,
         };
 
-        var response_buf: [READ_BUF_LIMIT]u8 = undefined;
-        const wireResponse = response.createResponseWire(&response_buf) catch |err| {
+        var responseBuffer: [READ_BUF_LIMIT]u8 = undefined;
+        const wireResponse = response.createResponseWire(&responseBuffer) catch |err| {
             print("Failed to build response: {}\n", .{err});
             continue;
         };
 
         client_writer.interface.writeAll(wireResponse) catch |err| print("Error occured while writing to the write: {}", .{err});
+        client_writer.interface.flush() catch |err| print("Couldn't flush\n{}", .{err});
     }
 }
