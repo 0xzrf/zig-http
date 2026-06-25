@@ -62,7 +62,7 @@ pub const Parser = struct {
         if (contains(u8, line, "/delete-contact") != null) {
             req.setRoute(Routes.DELETE_CONTACT);
         }
-        if (contains(u8, line, "/") != null) {
+        if (contains(u8, line, "/ ") != null) {
             req.setRoute(Routes.ROOT);
         }
     }
@@ -88,7 +88,6 @@ test "GET /get-contact parses correctly" {
     const request = "GET /get-contact HTTP/1.1\r\n";
 
     Parser.extractField(request, &requestParser);
-    std.debug.print("route expected: {}\nactual {?}\n", .{ Routes.GET_CONTACT, requestParser.route });
     try expectEqual(requestParser.method, Methods.GET);
 
     try expectEqual(requestParser.route, Routes.GET_CONTACT);
