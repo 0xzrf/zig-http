@@ -17,7 +17,7 @@ pub const Parser = struct {
     const contains = std.mem.indexOf;
     const print = std.debug.print;
 
-    pub fn parseRequest(self: *Parser) void {
+    pub fn parseRequest(self: *Parser) !ParsedRequest {
         var reader = self.*.reader;
         var request = ParsedRequest.new();
 
@@ -35,6 +35,10 @@ pub const Parser = struct {
             if (request.allRequiredSet()) {
                 break;
             }
+        }
+
+        if (request.allRequiredSet()) {
+            return request;
         }
     }
 
