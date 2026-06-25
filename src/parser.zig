@@ -19,6 +19,8 @@ pub const Parser = struct {
         var reader = self.*.reader;
         var request = ParsedRequest.new();
 
+        // for now, we're reading each line. We can extend Parser.extractField to support more options
+        // like checking for body content as valid if the request says `Content-Type: json` or something
         while (reader.takeDelimiter('\n') catch |err|
             {
                 print("Unable to take delimiter: {}\n", .{err});
@@ -26,6 +28,11 @@ pub const Parser = struct {
             }) |line| // this line should be each line, with ending \n excluded(every line in an http header ends with \r\n)
         {
             Parser.extractField(line, &request);
+
+            // if the values are set, then break
+            if (request.allRequiredSet()) {
+                break;
+            }
         }
     }
 
