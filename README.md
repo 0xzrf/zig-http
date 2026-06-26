@@ -1,5 +1,5 @@
 ## INTRO
-This is an HTTP server written in ZIG from scratch, that allows you to do CRUD operation on a contact server, serving both frontend and backend
+This is an HTTP server written in ZIG from scratch, that allows you to do CRUD operation on a contact server, serving just the backend
 Ideally, this should be able to handle request from both browser and curl.
 
 # DESIGN
@@ -37,3 +37,10 @@ This is just a learning project, so it'll only support a subset of features prov
 2. **2xx - Success**: `200 OK`, `201 Created`
 3. **4xx - Client error**: `400 Bad Request`, `401 Unauthorized`, `404 Not Found`, `405 Method Not Allowed`
 4. **5xx - Server Error**: `500 Internal Server Error`, `501 Not Implemented`
+
+### Supported routes
+1. `/`: Gives you a good Programming introductory `Hello World!` screen
+2. `/get-contact?contact=$`: Gives you the contact's phone saved on db
+3. `/del-contact`: Deletes a contact from db
+4. `/update-contact`: updates an existing contact
+5. `/upload-contact`: Uploads a new contact. Errors if it already exists
