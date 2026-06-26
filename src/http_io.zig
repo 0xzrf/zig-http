@@ -57,6 +57,7 @@ pub fn httpListener(io: *const std.Io) void {
 
         const response = switch (parsedRequest.route.?) {
             Routes.ROOT => routes.root.handleRootCall(),
+            Routes.GET_CONTACT => routes.getContact.handleGetContact(),
             else => continue,
         };
 
