@@ -62,12 +62,16 @@ pub fn httpListener(io: *const std.Io, gpa: *const std.mem.Allocator) void {
             continue;
         }
 
+        // Holds the dynamic response body (e.g. the fetched phone number).
+        // Must outlive `response`, since `response.returnData` may borrow from it.
+        var body_buf: [BUF_LIMIT]u8 = undefined;
+
         const response = switch (parsedRequest.route.?) {
             Routes.ROOT => routes.root.handleRootCall(),
-            Routes.GET_CONTACT => routes.getContact.handleGetContact(&parsedRequest, &db) catch {
-                continue;
-            },
-            else => continue,
+            Routes.GET_CONTACT => routes.getContact.handleGetContact(&parsedRequest, &db, &body_buf) catch continue,
+            Routes.UPLOAD_CONTACT => routes.uploadContact.handleUploadContact(&parsedRequest, &db) catch continue,
+            Routes.UPDATE_CONTACT => routes.updateContact.handleUpdateContact(&parsedRequest, &db) catch continue,
+            Routes.DELETE_CONTACT => routes.delContact.handleDelContact(&parsedRequest, &db) catch continue,
         };
 
         var responseBuffer: [BUF_LIMIT]u8 = undefined;

@@ -6,10 +6,40 @@ pub const StatusCode = enum(u16) { OK = 200, CREATED = 201, BAD_REQUEST = 400, U
 
 pub const RequestErrors = error{
     InvalidMethod,
+    InvalidPayload,
+    NotFound,
+    ServerError,
 };
 
 pub const Routes = enum { GET_CONTACT, UPDATE_CONTACT, UPLOAD_CONTACT, DELETE_CONTACT, ROOT };
 pub const ContentType = enum { HTML, JSON };
+
+pub const ContactPhone = struct {
+    contact: []const u8,
+    phone: []const u8,
+};
+
+/// Decodes a length-prefixed payload of the form:
+///   [contact_len: u8][contact bytes...][phone_len: u8][phone bytes...]
+/// The returned slices borrow from `data`; they're valid as long as `data` is.
+pub fn decodeContactPhone(data: []const u8) RequestErrors!ContactPhone {
+    // Need at least the contact-length byte and the phone-length byte.
+    if (data.len < 2) return RequestErrors.InvalidPayload;
+
+    const contact_len: usize = data[0];
+    const contact_end = 1 + contact_len; // index of the phone-length byte
+    if (contact_end >= data.len) return RequestErrors.InvalidPayload;
+
+    const phone_len: usize = data[contact_end];
+    const phone_start = contact_end + 1;
+    const phone_end = phone_start + phone_len;
+    if (phone_end > data.len) return RequestErrors.InvalidPayload;
+
+    return ContactPhone{
+        .contact = data[1..contact_end],
+        .phone = data[phone_start..phone_end],
+    };
+}
 
 // the user data will be an array of bytes, which the parser will serialize in order that the route struct will expect
 pub const ParsedRequest = struct {

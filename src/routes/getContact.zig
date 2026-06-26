@@ -1,3 +1,4 @@
+const std = @import("std");
 const DB = @import("../db.zig").DB;
 const types = @import("../types.zig");
 
@@ -7,22 +8,22 @@ const ParsedRequest = types.ParsedRequest;
 const StatusCode = types.StatusCode;
 const ContentType = types.ContentType;
 
-pub fn handleGetContact(parsedRequest: *const ParsedRequest, db: *DB) RequestErrors!ParsedResponse {
-    if (parsedRequest.*.method.? != types.Methods.GET) {
+/// GET /get-contact?name=<contact>
+/// `user_data` is the contact name as-is.
+/// `body_buf` is owned by the caller and must outlive the returned response,
+/// since `returnData` borrows from it.
+pub fn handleGetContact(parsedRequest: *const ParsedRequest, db: *DB, body_buf: []u8) RequestErrors!ParsedResponse {
+    if (parsedRequest.method.? != types.Methods.GET) {
         return RequestErrors.InvalidMethod;
     }
 
-    // since we expect only contact to be there, we can directly send parsedRequest.userData as is
-    // user_data == null checked during parsing
-    const ph = db.fetchContact(parsedRequest.user_data.?) catch return RequestErrors.InvalidMethod;
-    defer db.*.allocator.free(ph); // required to avoid memory leaks
+    const contact = parsedRequest.user_data orelse return RequestErrors.InvalidPayload;
 
-    const returnData: [15]u8 = undefined;
-    @import("std").fmt.bufPrint(
-        returnData,
-        "{ \"ph\": {s} }",
-        .{ph},
-    );
+    // fetchContact allocates an owned copy, so we must free it before returning.
+    const ph = db.fetchContact(contact) catch return RequestErrors.NotFound;
+    defer db.allocator.free(ph);
 
-    return ParsedResponse{ .contentType = ContentType.JSON, .returnData = returnData, .status = StatusCode.OK };
+    const body = std.fmt.bufPrint(body_buf, "{{\"ph\":\"{s}\"}}", .{ph}) catch return RequestErrors.ServerError;
+
+    return ParsedResponse{ .status = StatusCode.OK, .contentType = ContentType.JSON, .returnData = body };
 }
