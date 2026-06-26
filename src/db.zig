@@ -9,6 +9,7 @@ const pg = @import("pg");
 
 pub const DB = struct {
     endpoint: []const u8,
+    allocator: std.mem.Allocator,
     pool: *pg.Pool,
 
     /// Opens a connection pool to `endpoint` and verifies it works.
@@ -27,17 +28,57 @@ pub const DB = struct {
         // query so a bad host/credentials surfaces here as an error.
         _ = try pool.exec("select 1", .{});
 
-        return DB{ .endpoint = endpoint, .pool = pool };
+        _ = try pool.exec(
+            \\create table if not exists my_contacts (
+            \\    contact text primary key,
+            \\    phone text not null
+            \\)
+        , .{});
+
+        return DB{ .endpoint = endpoint, .allocator = gpa, .pool = pool };
     }
 
     pub fn deinit(self: *DB) void {
         self.pool.deinit();
     }
 
-    // pub fn fetchContact(contact: []const u8) ![]const u8 {}
-    // pub fn updateContact(contact: []const u8, ph: []const u8) !void {}
-    // pub fn uploadContact(contact: []const u8, ph: []const u8) !void {}
-    // pub fn delContact(contact: []const u8) !void {}
+    /// Returns an owned copy of the contact's phone number.
+    /// The caller must free the returned slice with the allocator passed to `new`.
+    pub fn fetchContact(self: *DB, contact: []const u8) ![]u8 {
+        var row = (try self.pool.row(
+            "select phone from my_contacts where contact = $1",
+            .{contact},
+        )) orelse return error.ContactNotFound;
+        defer row.deinit() catch {};
+
+        const phone = try row.get([]const u8, 0);
+        return self.allocator.dupe(u8, phone);
+    }
+
+    pub fn updateContact(self: *DB, contact: []const u8, ph: []const u8) !void {
+        const updated = (try self.pool.exec(
+            "update my_contacts set phone = $1 where contact = $2",
+            .{ ph, contact },
+        )) orelse 0;
+
+        if (updated == 0) return error.ContactNotFound;
+    }
+
+    pub fn uploadContact(self: *DB, contact: []const u8, ph: []const u8) !void {
+        _ = try self.pool.exec(
+            "insert into my_contacts (contact, phone) values ($1, $2)",
+            .{ contact, ph },
+        );
+    }
+
+    pub fn delContact(self: *DB, contact: []const u8) !void {
+        const deleted = (try self.pool.exec(
+            "delete from my_contacts where contact = $1",
+            .{contact},
+        )) orelse 0;
+
+        if (deleted == 0) return error.ContactNotFound;
+    }
 };
 
 test "check db connectivity" {
@@ -54,5 +95,4 @@ test "check db connectivity" {
     defer db.deinit();
 
     try std.testing.expectEqualStrings(endpoint, db.endpoint);
-    std.debug.print("Hello", .{});
 }
