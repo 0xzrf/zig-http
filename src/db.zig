@@ -145,6 +145,7 @@ test "check get contact" {
     try db.uploadContact(contact, ph);
 
     const fetchedPh = try db.fetchContact(contact);
+    defer db.allocator.free(fetchedPh);
 
     try std.testing.expectEqualStrings(ph, fetchedPh);
 
