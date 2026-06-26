@@ -6,6 +6,7 @@
 
 const std = @import("std");
 const pg = @import("pg");
+const builtin = @import("builtin");
 
 pub const DB = struct {
     endpoint: []const u8,
@@ -81,7 +82,11 @@ pub const DB = struct {
     }
 };
 
-test "check db connectivity" {
+fn initDb() !DB {
+    if (comptime !builtin.is_test) {
+        @compileError("can only call this during test");
+    }
+
     const allocator = std.testing.allocator;
 
     // A test has no std.process.Init, so build an Io implementation ourselves.
@@ -91,8 +96,24 @@ test "check db connectivity" {
 
     const endpoint = "postgresql://zerefdegnl@localhost:5432/myapp";
 
-    var db = try DB.new(endpoint, allocator, io);
+    return try DB.new(endpoint, allocator, io);
+}
+
+test "check db connectivity" {
+    const endpoint = "postgresql://zerefdegnl@localhost:5432/myapp";
+    var db = try initDb();
     defer db.deinit();
 
-    try std.testing.expectEqualStrings(endpoint, db.endpoint);
+    std.testing.expectEqualStrings(endpoint, db.endpoint);
+}
+
+test "check create contact" {
+    const contact = "Zeref";
+    const ph = "+xx xxxxx xxxxx";
+
+    var db = try initDb();
+    defer db.delContact(contact);
+    defer db.deinit();
+
+    try db.uploadContact(contact, ph);
 }
