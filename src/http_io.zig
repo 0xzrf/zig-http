@@ -7,6 +7,8 @@ const std = @import("std");
 const constants = @import("constants.zig");
 const routes = @import("routes/mod.zig");
 const types = @import("types.zig");
+const DB = @import("db.zig").DB;
+
 const Routes = types.Routes;
 const Parser = @import("parser.zig").Parser;
 
@@ -15,7 +17,12 @@ const IP_ADDR = constants.IP_ADDR;
 const PORT = constants.PORT;
 const BUF_LIMIT = constants.BUF_LIMIT;
 
-pub fn httpListener(io: *const std.Io) void {
+pub fn httpListener(io: *const std.Io, gpa: *const std.mem.Allocator) void {
+    var db = DB.new("postgresql://zerefdegnl@localhost:5432/myapp", gpa.*, io.*) catch {
+        print("Failed to connect to DB", .{});
+        return;
+    };
+
     const addr = std.Io.net.IpAddress.parse(IP_ADDR, PORT) catch |err| {
         print("Failed to parse IP Address: {}\n", .{err});
         return;
@@ -57,7 +64,9 @@ pub fn httpListener(io: *const std.Io) void {
 
         const response = switch (parsedRequest.route.?) {
             Routes.ROOT => routes.root.handleRootCall(),
-            Routes.GET_CONTACT => routes.getContact.handleGetContact(),
+            Routes.GET_CONTACT => routes.getContact.handleGetContact(&parsedRequest, &db) catch {
+                continue;
+            },
             else => continue,
         };
 

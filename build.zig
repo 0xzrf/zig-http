@@ -33,7 +33,9 @@ pub fn build(b: *std.Build) void {
 
     db.root_module.addImport("pg", pgModule);
     httpIOLib.root_module.addImport("pg", pgModule);
+
     exe.root_module.linkLibrary(httpIOLib);
+    exe.root_module.addImport("pg", pgModule);
 
     const db_tests = b.addTest(.{
         .root_module = b.createModule(.{
