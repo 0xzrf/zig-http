@@ -16,6 +16,11 @@ const print = std.debug.print;
 const IP_ADDR = constants.IP_ADDR;
 const PORT = constants.PORT;
 const BUF_LIMIT = constants.BUF_LIMIT;
+const BAD_REQUEST_RESPONSE = types.ParsedResponse{
+    .status = .BAD_REQUEST,
+    .contentType = .JSON,
+    .returnData = "{\"error\":\"invalid request\"}",
+};
 
 pub fn httpListener(io: *const std.Io, gpa: *const std.mem.Allocator) void {
     var db = DB.new("postgresql://zerefdegnl@localhost:5432/myapp", gpa.*, io.*) catch {
@@ -53,12 +58,14 @@ pub fn httpListener(io: *const std.Io, gpa: *const std.mem.Allocator) void {
         var client_reader = client.reader(io.*, reader_buf[0..]);
         var client_writer = client.writer(io.*, writer_buf[0..]);
 
-        var parser = Parser{ .reader = &client_reader.interface, .writer = &client_writer.interface };
+        var user_data_buf: [BUF_LIMIT]u8 = undefined;
+        var parser = Parser{ .reader = &client_reader.interface, .writer = &client_writer.interface, .user_data_buf = &user_data_buf };
         const parsedRequest = parser.parseRequest();
 
+        var responseBuffer: [BUF_LIMIT]u8 = undefined;
         if (!parsedRequest.allRequiredSet()) {
-            // TODO: Send an invalid request response here instead. It should be json, since we don't want
-            // to send an html page saying it's invalid when the browser sends a request to /favicon.ico
+            const wireResponse = BAD_REQUEST_RESPONSE.createResponseWire(&responseBuffer) catch continue;
+            parser.sendBackRespone(wireResponse);
             continue;
         }
 
@@ -68,13 +75,12 @@ pub fn httpListener(io: *const std.Io, gpa: *const std.mem.Allocator) void {
 
         const response = switch (parsedRequest.route.?) {
             Routes.ROOT => routes.root.handleRootCall(),
-            Routes.GET_CONTACT => routes.getContact.handleGetContact(&parsedRequest, &db, &body_buf) catch continue,
-            Routes.UPLOAD_CONTACT => routes.uploadContact.handleUploadContact(&parsedRequest, &db) catch continue,
-            Routes.UPDATE_CONTACT => routes.updateContact.handleUpdateContact(&parsedRequest, &db) catch continue,
-            Routes.DELETE_CONTACT => routes.delContact.handleDelContact(&parsedRequest, &db) catch continue,
+            Routes.GET_CONTACT => routes.getContact.handleGetContact(&parsedRequest, &db, &body_buf) catch BAD_REQUEST_RESPONSE,
+            Routes.UPLOAD_CONTACT => routes.uploadContact.handleUploadContact(&parsedRequest, &db) catch BAD_REQUEST_RESPONSE,
+            Routes.UPDATE_CONTACT => routes.updateContact.handleUpdateContact(&parsedRequest, &db) catch BAD_REQUEST_RESPONSE,
+            Routes.DELETE_CONTACT => routes.delContact.handleDelContact(&parsedRequest, &db) catch BAD_REQUEST_RESPONSE,
         };
 
-        var responseBuffer: [BUF_LIMIT]u8 = undefined;
         const wireResponse = response.createResponseWire(&responseBuffer) catch |err| {
             print("Failed to build response: {}\n", .{err});
             continue;

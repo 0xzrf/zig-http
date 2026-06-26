@@ -45,7 +45,7 @@ pub fn decodeContactPhone(data: []const u8) RequestErrors!ContactPhone {
 pub const ParsedRequest = struct {
     route: ?Routes,
     method: ?Methods,
-    user_data: ?[]u8,
+    user_data: ?[]const u8,
 
     pub fn new() ParsedRequest {
         return ParsedRequest{ .route = null, .method = null, .user_data = null };
@@ -61,6 +61,10 @@ pub const ParsedRequest = struct {
 
     pub fn setMethod(self: *ParsedRequest, method: Methods) void {
         self.*.method = method;
+    }
+
+    pub fn setUserData(self: *ParsedRequest, user_data: []const u8) void {
+        self.*.user_data = user_data;
     }
 };
 
