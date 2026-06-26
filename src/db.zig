@@ -134,4 +134,19 @@ test "check update contact" {
     try db.delContact(contact);
 }
 
-test "check get contact" {}
+test "check get contact" {
+    const contact = "Zeref";
+    const ph = "+xx xxxxx xxxxx";
+
+    var db = try initDb();
+
+    defer db.deinit();
+
+    try db.uploadContact(contact, ph);
+
+    const fetchedPh = try db.fetchContact(contact);
+
+    try std.testing.expectEqualStrings(ph, fetchedPh);
+
+    try db.delContact(contact);
+}
