@@ -49,6 +49,10 @@ pub fn httpListener(io: *const std.Io) void {
         var parser = Parser{ .reader = &client_reader.interface, .writer = &client_writer.interface };
         const parsedRequest = parser.parseRequest();
 
+        if (!parsedRequest.allRequiredSet()) {
+            continue; // TODO: Send an invalid request response here instea
+        }
+
         const response = switch (parsedRequest.route.?) {
             Routes.ROOT => routes.root.handleRootCall(),
             else => continue,
@@ -60,7 +64,6 @@ pub fn httpListener(io: *const std.Io) void {
             continue;
         };
 
-        client_writer.interface.writeAll(wireResponse) catch |err| print("Error occured while writing to the write: {}", .{err});
-        client_writer.interface.flush() catch |err| print("Couldn't flush\n{}", .{err});
+        parser.sendBackRespone(wireResponse);
     }
 }

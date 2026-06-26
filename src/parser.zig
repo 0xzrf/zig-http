@@ -33,13 +33,17 @@ pub const Parser = struct {
 
             // if the values are set, then break
             if (request.allRequiredSet()) {
-                print("breaking after request is set]n", .{});
                 break;
             }
         }
 
         // TODO: figure out throwing error as it's causing issue an issue right now in macOs
         return request;
+    }
+
+    pub fn sendBackRespone(self: *Parser, data: []const u8) void {
+        self.*.writer.writeAll(data) catch |err| print("Error occured while writing to the write: {}\n", .{err});
+        self.*.writer.flush() catch |err| print("Couldn't flush\n{}", .{err});
     }
 
     fn extractField(line: []const u8, req: *ParsedRequest) void {

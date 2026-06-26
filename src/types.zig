@@ -17,7 +17,7 @@ pub const ParsedRequest = struct {
         return ParsedRequest{ .route = null, .method = null, .user_data = null };
     }
 
-    pub fn allRequiredSet(self: *ParsedRequest) bool {
+    pub fn allRequiredSet(self: *const ParsedRequest) bool {
         return (self.*.route != null and self.*.method != null);
     }
 
