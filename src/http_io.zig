@@ -13,7 +13,7 @@ const Parser = @import("parser.zig").Parser;
 const print = std.debug.print;
 const IP_ADDR = constants.IP_ADDR;
 const PORT = constants.PORT;
-const READ_BUF_LIMIT = constants.READ_BUF_LIMIT;
+const BUF_LIMIT = constants.BUF_LIMIT;
 
 pub fn httpListener(io: *const std.Io) void {
     const addr = std.Io.net.IpAddress.parse(IP_ADDR, PORT) catch |err| {
@@ -35,8 +35,8 @@ pub fn httpListener(io: *const std.Io) void {
         };
         defer client.close(io.*); // closes the client once it has served the request(End of scope)
 
-        var reader_buf: [READ_BUF_LIMIT]u8 = undefined;
-        var writer_buf: [READ_BUF_LIMIT]u8 = undefined;
+        var reader_buf: [BUF_LIMIT]u8 = undefined;
+        var writer_buf: [BUF_LIMIT]u8 = undefined;
 
         for (&reader_buf, &writer_buf) |*item1, *item2| {
             item1.* = 0;
@@ -50,7 +50,9 @@ pub fn httpListener(io: *const std.Io) void {
         const parsedRequest = parser.parseRequest();
 
         if (!parsedRequest.allRequiredSet()) {
-            continue; // TODO: Send an invalid request response here instea
+            // TODO: Send an invalid request response here instead. It should be json, since we don't want
+            // to send an html page saying it's invalid when the browser sends a request to /favicon.ico
+            continue;
         }
 
         const response = switch (parsedRequest.route.?) {
@@ -58,7 +60,7 @@ pub fn httpListener(io: *const std.Io) void {
             else => continue,
         };
 
-        var responseBuffer: [READ_BUF_LIMIT]u8 = undefined;
+        var responseBuffer: [BUF_LIMIT]u8 = undefined;
         const wireResponse = response.createResponseWire(&responseBuffer) catch |err| {
             print("Failed to build response: {}\n", .{err});
             continue;

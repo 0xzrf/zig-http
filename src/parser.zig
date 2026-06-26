@@ -28,7 +28,6 @@ pub const Parser = struct {
                 return request;
             }) |line| // this line should be each line, with ending \n excluded(every line in an http header ends with \r\n)
         {
-            print("{s}\n", .{line});
             Parser.extractField(line, &request);
 
             // if the values are set, then break
