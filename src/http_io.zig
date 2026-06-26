@@ -24,7 +24,7 @@ const BAD_REQUEST_RESPONSE = types.ParsedResponse{
 
 pub fn httpListener(io: *const std.Io, gpa: *const std.mem.Allocator) void {
     var db = DB.new("postgresql://zerefdegnl@localhost:5432/myapp", gpa.*, io.*) catch {
-        print("Failed to connect to DB", .{});
+        print("Failed to connect to DB\n", .{});
         return;
     };
 
@@ -74,7 +74,7 @@ pub fn httpListener(io: *const std.Io, gpa: *const std.mem.Allocator) void {
         var body_buf: [BUF_LIMIT]u8 = undefined;
 
         const response = switch (parsedRequest.route.?) {
-            Routes.ROOT => routes.root.handleRootCall(),
+            Routes.ROOT => routes.root.handleRootCall(io.*, &body_buf) catch BAD_REQUEST_RESPONSE,
             Routes.GET_CONTACT => routes.getContact.handleGetContact(&parsedRequest, &db, &body_buf) catch BAD_REQUEST_RESPONSE,
             Routes.UPLOAD_CONTACT => routes.uploadContact.handleUploadContact(&parsedRequest, &db) catch BAD_REQUEST_RESPONSE,
             Routes.UPDATE_CONTACT => routes.updateContact.handleUpdateContact(&parsedRequest, &db) catch BAD_REQUEST_RESPONSE,
