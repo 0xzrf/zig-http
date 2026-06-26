@@ -3,6 +3,7 @@
 //! /update-contact will take the key-value pair for the target contact and update it
 //! /upload-contact will add a new row to the db
 //! and lastly, /delete-contact will delete a specified contact
+
 const std = @import("std");
 const pg = @import("pg");
 
@@ -33,8 +34,25 @@ pub const DB = struct {
         self.pool.deinit();
     }
 
-    // pub fn fetchContact(contact: []const u8) !void {}
+    // pub fn fetchContact(contact: []const u8) ![]const u8 {}
     // pub fn updateContact(contact: []const u8, ph: []const u8) !void {}
     // pub fn uploadContact(contact: []const u8, ph: []const u8) !void {}
     // pub fn delContact(contact: []const u8) !void {}
 };
+
+test "check db connectivity" {
+    const allocator = std.testing.allocator;
+
+    // A test has no std.process.Init, so build an Io implementation ourselves.
+    var threaded: std.Io.Threaded = .init(allocator, .{});
+    defer threaded.deinit();
+    const io = threaded.io();
+
+    const endpoint = "postgresql://zerefdegnl@localhost:5432/myapp";
+
+    var db = try DB.new(endpoint, allocator, io);
+    defer db.deinit();
+
+    try std.testing.expectEqualStrings(endpoint, db.endpoint);
+    std.debug.print("Hello", .{});
+}
