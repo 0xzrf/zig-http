@@ -104,7 +104,7 @@ test "check db connectivity" {
     var db = try initDb();
     defer db.deinit();
 
-    std.testing.expectEqualStrings(endpoint, db.endpoint);
+    try std.testing.expectEqualStrings(endpoint, db.endpoint);
 }
 
 test "check create contact" {
@@ -112,8 +112,26 @@ test "check create contact" {
     const ph = "+xx xxxxx xxxxx";
 
     var db = try initDb();
-    defer db.delContact(contact);
+
     defer db.deinit();
 
     try db.uploadContact(contact, ph);
+    try db.delContact(contact);
 }
+
+test "check update contact" {
+    const contact = "Zeref";
+    const ph = "+xx xxxxx xxxxx";
+    const new_ph = "+xx xxxxx xxxxx";
+
+    var db = try initDb();
+
+    defer db.deinit();
+
+    try db.uploadContact(contact, ph);
+    try db.updateContact(contact, new_ph);
+
+    try db.delContact(contact);
+}
+
+test "check get contact" {}
