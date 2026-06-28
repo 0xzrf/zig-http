@@ -44,3 +44,20 @@ This is just a learning project, so it'll only support a subset of features prov
 3. `/del-contact`: Deletes a contact from db
 4. `/update-contact`: updates an existing contact
 5. `/upload-contact`: Uploads a new contact. Errors if it already exists
+
+## How to run
+Pre-requisite: Download zig from ther [official website](https://ziglang.org/download/)
+
+Also, you'd probably wanna change the postgres db address in the following to make it fully work(env is a pain in the neck in zig rn): https://github.com/0xzrf/zig-http/blob/b79a91ba324a97cf83f1552ddb5e4964f876ba01/src/http_io.zig#L26
+
+Then, run to start the server:
+```bash
+make build_and_run
+```
+
+After setting up the db and running the command, you should see this:
+```bash
+TCP listening on http://0.0.0.0:3636
+```
+
+Go to the website, and have fun!
